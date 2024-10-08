@@ -1,0 +1,37 @@
+<?php
+namespace GreenHonchos\CustomCanonical\Plugin;
+
+use Magento\Framework\View\Page\Config;
+use Magento\Framework\UrlInterface;
+
+class ModifyCanonicalUrl
+{
+    protected $urlBuilder;
+
+    public function __construct(
+        UrlInterface $urlBuilder
+    ) {
+        $this->urlBuilder = $urlBuilder;
+    }
+
+    public function beforeAddRemotePageAsset(Config $subject, $url, $type, $attributes = [])
+    {
+        // Check if the asset type is a canonical link
+        if ($type === 'canonical') {
+            // Get the current page canonical URL
+            $canonicalUrl = $this->urlBuilder->getCurrentUrl();
+
+            // Define the live domain you want to use
+            $liveDomain = 'https://forevernew.co.in';
+
+            // Replace the current domain with the live domain in the canonical URL
+            $updatedCanonicalUrl = preg_replace("/^https?:\/\/[^\/]+/", $liveDomain, $canonicalUrl);
+
+            // Return the modified canonical URL
+            return [$updatedCanonicalUrl, $type, $attributes];
+        }
+
+        // If it's not a canonical link, return the original URL
+        return [$url, $type, $attributes];
+    }
+}
